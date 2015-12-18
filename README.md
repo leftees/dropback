@@ -3,6 +3,7 @@
 ## Overview
 *Dropback* is an application designed to back up whole directories from your local computer/server into Dropbox, while retaining key metadata such as file permissions and ownership.
 
+[![Build Status](https://travis-ci.org/jondlove/dropback.svg?branch=master)](https://travis-ci.org/jondlove/dropback)[![Coverage Status](https://coveralls.io/repos/jondlove/dropback/badge.svg?branch=master&service=github)](https://coveralls.io/github/jondlove/dropback?branch=master)
 ## How To Use
 ### Getting Started
 - Login to (Dropbox Developer Console)[https://www.dropbox.com/developers] and create a new app
