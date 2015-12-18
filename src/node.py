@@ -21,10 +21,12 @@ import traceback
 
 
 class UnknownNodeTypeException(Exception):
+    """Raised if an unknown node type is encountered in the metadata"""
     pass
 
 
 class NFile(object):
+    """Represents a file"""
     # 100 MB chunk limit. 
     # Dropbox actually states 120MB is the limit but this is lower to be safer
     CHUNKED_SIZE_LIMIT = 1024*1024*100
@@ -55,6 +57,7 @@ class NFile(object):
         self.size  = stats["size"]
 
     def encodable(self, max_recurse_depth=-1, only_uploaded=True):
+        """Returns an encodable representation of NFile"""
         # We accept extra parameters on encodable that NFile doesn't need
         # because it's easier than extra logic on NFolder
         obj = {
@@ -77,6 +80,7 @@ class NFile(object):
 
     # Replace this with a more efficient approach
     def generate_path (self):
+        """Generate the location from parent of this NFile"""
         current_path = os.path.join(self.name)
         node = self.parent
         while node != None:
@@ -85,9 +89,11 @@ class NFile(object):
         return current_path
 
     def generate_full_path(self, source_base):
+        """Generate the location of NFile, relative to source_base"""
         return os.path.join(source_base, self.generate_path())
 
-    def restore(self, local_base, dropbox_client, source, source_base="/", overwrite_mode=True, max_recurse_depth=-1):      
+    def restore(self, local_base, dropbox_client, source, source_base="/", overwrite_mode=True, max_recurse_depth=-1):
+        """Restore this file"""
         path = self.generate_path()
         full_local_path = os.path.join(local_base, path)
         source_path = "/".join([source_base, path])
@@ -124,6 +130,7 @@ class NFile(object):
             logging.error("Skipping NFile {remote_path}".format(remote_path=full_remote_path))
 
     def upload(self, source_base, dropbox_client, target, target_base="/", overwrite_mode=True, max_recurse_depth=-1):
+        """Upload this file to Dropbox"""
         if not self.uploaded:
             path = self.generate_path()
             full_local_path = os.path.join(source_base, path)
@@ -188,6 +195,7 @@ class NFile(object):
 
 
 class NFolder(NFile):
+    """Represents a folder as a special case of NFile"""
     # Folder is a special type of file
     children = None
 
@@ -200,6 +208,7 @@ class NFolder(NFile):
         self.children = []
 
     def encodable(self, max_recurse_depth=-1, only_uploaded=False):
+        """Returns an encodable representation of NFile"""
         d = super(NFolder, self).encodable()
         if max_recurse_depth != 0:
             # max_recurse_depth of -1 gives us an infinite recurse depth
@@ -208,6 +217,7 @@ class NFolder(NFile):
         return d
 
     def get_metadata_from_path(self, ff_path):
+        """Loads metadata about the local path"""
         stats = os.stat(ff_path)
         return {
             'uid': stats.st_uid,
@@ -219,6 +229,7 @@ class NFolder(NFile):
         }
 
     def walk_local_tree_r (self, source_base, max_recurse_depth=-1):
+        """Walks the local file tree on the source system"""
         logging.debug("Node.walk_local_tree_r: Recurse depth {}".format(max_recurse_depth))
         # Recursively construct a local node tree
         # We assume someone's already checked we're a directory
@@ -250,6 +261,7 @@ class NFolder(NFile):
                     self.children.append(new_file)
 
     def rewrite_index_without_assumption_tree_r(self, dropbox_client, target, target_base="/", rewrite_index=True, max_recurse_depth=-1):
+        """Reconstruct an and index without assuming metadata exists"""
         # Reconstruct a node tree and index without assuming that the provided metadata file exists
         # We recurse the file tree and look for:
         #   - Metadata files in subfolders, when we don't have a metadata file in our folder
@@ -382,6 +394,7 @@ class NFolder(NFile):
         return someone_has_meta
 
     def walk_remote_tree_r(self, dropbox_client, target, target_base="/", max_recurse_depth=-1):
+        """Walks a remote dropbox tree"""
         logging.debug("Node.walk_remote_tree_r: Recurse depth {}".format(max_recurse_depth))
 
         # Recursively construct a remote node tree based on remote metadata
@@ -434,6 +447,7 @@ class NFolder(NFile):
                         logging.warning(traceback.format_exc())
 
     def restore(self, local_base, dropbox_client, source, source_base="/", overwrite_mode=True, max_recurse_depth=-1):
+        """Restore a Dropbox folder"""
         path = self.generate_path()
         full_local_path = os.path.join(local_base, path)
         source_path = "/".join([source_base, path])
@@ -474,6 +488,7 @@ class NFolder(NFile):
             logging.error("Skipping NFolder {remote_path}".format(remote_path=full_remote_path))
 
     def upload(self, source_base, dropbox_client, target, target_base="/", overwrite_mode=True, max_recurse_depth=-1):
+        """Upload a local folder to Dropbox"""
         path = self.generate_path()
         full_local_path = os.path.join(source_base, path)
         target_path = "/".join([target_base, path])
@@ -552,6 +567,8 @@ class NFolder(NFile):
 
 
 class NRootFolder(NFolder):
+    """Represents the folder at the top of the backup"""
+    
     def __init__(self):
         self.children = []
         self.name=""

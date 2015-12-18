@@ -35,6 +35,7 @@ ACCESS_TYPE = "app_folder"
 
 
 def get_active_config_path(config_file):
+    """Find out which config path contains the config we need"""
     for path in CONFIG_SEARCH_PATHS:
         if os.path.exists(path) and os.path.exists(os.path.join(path, config_file)) and os.path.isfile(os.path.join(path, config_file)):
             return os.path.join(path, config_file)
@@ -42,6 +43,7 @@ def get_active_config_path(config_file):
 
 
 def parse_target(target):
+    """Parse a backup/restore target from command line args"""
     logging.debug("Parsing target: {}".format(target))
     # We don't validate the path, that's up to Dropbox; however we do check for a leading slash
     target_match = re.compile("([a-zA-Z_][a-zA-Z0-9_-]*?):(/.*)")
@@ -51,6 +53,7 @@ def parse_target(target):
     return matches.group(1), matches.group(2)
 
 def diff_trees_r(local, remote, max_recurse_depth=-1):
+    """Find differences between two sets of file trees recursively"""
     logging.debug("diff_trees_r: Recurse depth {}".format(max_recurse_depth))
     diff_node = copy.copy(local)
     diff_node.children = []
@@ -143,6 +146,7 @@ def diff_trees_r(local, remote, max_recurse_depth=-1):
 
 
 def diff_trees(local_root_node, remote_root_node, max_recurse_depth=-1):
+    """Find differences between two sets of file trees"""
     # Walk the trees
     # We always want to overwrite remote with the local root
     if max_recurse_depth != 0:
@@ -157,6 +161,7 @@ def diff_trees(local_root_node, remote_root_node, max_recurse_depth=-1):
 
 
 def backup(args, client):
+    """Backup files to Dropbox"""
     if not os.path.exists(args.source):
         raise Exception("Source directory does not exist")
 
@@ -195,6 +200,7 @@ def backup(args, client):
 
 
 def restore(args, client):
+    """Restore files from a Dropbox backup"""
     if not os.path.exists(args.destination):
         raise Exception("Restore directory does not exist")
 
@@ -211,6 +217,7 @@ def restore(args, client):
 
 
 def rebuild(args, client):
+    """Rebuild the file/folder index in a Dropbox backup"""
     target, target_folder = parse_target(args.target)
 
     remote_node_tree = NRootFolder()
@@ -218,6 +225,7 @@ def rebuild(args, client):
 
 
 def connect():
+    """Connect to Dropbox"""
     dropbox_sess = dropbox.session.DropboxSession(APP_KEY, APP_SECRET, ACCESS_TYPE)
     request_token = dropbox_sess.obtain_request_token()
 
@@ -245,13 +253,16 @@ def connect():
 
 
 def _clear_credentials():
+    """Reset Dropbox Credentials"""
     os.unlink(get_active_config_path("dropbox_backup_credentials"))
 
 def _store_credentials(access_token):
+    """Save Dropbox Credentials"""
     with open (get_active_config_path("dropbox_backup_credentials"), "w") as cred_file:
         pickle.dump(access_token, cred_file)
 
 def _load_credentials():
+    """Load Dropbox Credentials"""
     with open (get_active_config_path("dropbox_backup_credentials"), "r") as cred_file:
         access_token = pickle.load(cred_file)
     return access_token
