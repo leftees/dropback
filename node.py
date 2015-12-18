@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    backup-to-dropbox.node
+    dropback.node
     ~~~~~~~~~~~~~~
 
     Classes for working with files and folders as 'nodes' in Dropbox

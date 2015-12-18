@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    backup-to-dropbox.backup
+    dropback.backup
     ~~~~~~~~~~~~~~
 
     The main application; backs up directory to dropbox
