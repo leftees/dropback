@@ -10,7 +10,7 @@
 """
 
 import unittest
-from nodeTest import TestNFile, TestNFolder
+from node_test import TestNFile, TestNFolder
 
 class TestOther(unittest.TestCase):
     """Tests bits that don't belong in *_test files"""
