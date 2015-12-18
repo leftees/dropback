@@ -1,0 +1,15 @@
+[run]
+omit=
+	lib/python2.7/*
+	/home/travis/virtualenv/*
+	/opt/python/*
+
+[report]
+omit=
+	lib/python2.7/*
+	/home/travis/virtualenv/*
+	/opt/python/*
+exclude_lines=
+	pragma: no cover
+	if __name__ == .__main__.:
+	def __repr__

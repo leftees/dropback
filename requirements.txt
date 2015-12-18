@@ -1,2 +1,8 @@
 # Obviously we're using the Dropbox API
 dropbox>=3.27
+
+# We use coverage for code-coverage related testing
+coverage>=4.0.3
+
+# We use coveralls to integrate coverage.py (above) with Coveralls.io
+coveralls>=1.1
